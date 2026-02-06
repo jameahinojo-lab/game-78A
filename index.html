@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Word Scramble Game</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0644A0;
+      text-align: center;
+      padding-top: 40px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+        color: #FFFFFF;
+    }
+
+    #timer {
+      font-size: 32px;
+      margin-bottom: 10px;
+        color: #FFFFFF;
+    }
+
+    /* Progress bar */
+    #progress-container {
+      width: 80%;
+      height: 16px;
+      background: #eee;
+      border-radius: 10px;
+      margin: 0 auto 20px;
+      overflow: hidden;
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #94D67A;
+      transition: width 1s linear;
+    }
+
+    /* Flashing timer */
+    .flash {
+      color: red;
+      animation: flash 1s infinite;
+    }
+
+    @keyframes flash {
+      0% { opacity: 1; }
+      50% { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(5, auto);
+      grid-auto-flow: column;
+      gap: 12px;
+      width: 90vw;
+      height: calc(100vh - 200px);
+      margin: 0 auto;
+    }
+
+    .word-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: clamp(24px, 6vw, 48px);
+      padding: 30px;
+      cursor: pointer;
+      border: none;
+      border-radius: 20px;
+      background-color: #ddd;
+      transition: background-color 0.3s;
+    }
+
+    .word-btn .number {
+      font-weight: bold;
+      opacity: 0.7;
+    }
+
+    .word-btn.revealed {
+      background-color: #6aaa64;
+      color: white;
+      cursor: default;
+    }
+
+    .word-btn:disabled {
+      cursor: default;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Word Scramble – APAC Contries</h1>
+
+  <div id="timer">0</div>
+
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+
+  <div class="grid" id="buttonGrid"></div>
+
+  <!-- Time's up sound -->
+  <audio id="timesup-sound">
+    <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
+  </audio>
+
+  <script>
+    const words = [
+  { answer: "SINGAPORE", scramble: "GNPOERISA" },
+  { answer: "INDONESIA", scramble: "NAINISOED" },
+  { answer: "AFGHANISTAN", scramble: "IASANTGANHF" },
+  { answer: "SRI LANKA", scramble: "IRS NALAK" },
+  { answer: "THAILAND", scramble: "TAANIHDL" },
+  { answer: "NEW ZEALAND", scramble: "NWE NLAEADZ" },
+  { answer: "NEPAL", scramble: "APLEN" },
+  { answer: "MALAYSIA", scramble: "SALYAIAM" },
+  { answer: "REPUBLIC OF KOREA", scramble: "LIUEPBRC FO OERKA" },
+  { answer: "MYANMAR", scramble: "NYMRAMA" }
+];
+
+    let timePassed = 0;
+    const maxTime = 90;
+    let answeredCount = 0;
+
+    const timerEl = document.getElementById("timer");
+    const grid = document.getElementById("buttonGrid");
+    const progressBar = document.getElementById("progress-bar");
+
+    // Create buttons
+    words.forEach((word, index) => {
+      const btn = document.createElement("button");
+      btn.className = "word-btn";
+
+      const number = document.createElement("span");
+      number.className = "number";
+      number.textContent = index + 1;
+
+      const text = document.createElement("span");
+      text.textContent = word.scramble;
+
+      btn.appendChild(number);
+      btn.appendChild(text);
+
+      btn.addEventListener("click", () => {
+        if (btn.classList.contains("revealed")) return;
+
+        text.textContent = word.answer;
+        btn.classList.add("revealed");
+        btn.disabled = true;
+
+        answeredCount++;
+
+        if (answeredCount === words.length) {
+          clearInterval(timer);
+        }
+      });
+
+      grid.appendChild(btn);
+    });
+
+    // Timer
+    const timer = setInterval(() => {
+      timePassed++;
+      timerEl.textContent = timePassed;
+
+      // Progress bar update
+      progressBar.style.width = (timePassed / maxTime) * 100 + "%";
+
+      // Flash last 10 seconds
+      if (timePassed >= maxTime - 10) {
+        timerEl.classList.add("flash");
+      }
+
+      // Time's up
+      if (timePassed >= maxTime) {
+        clearInterval(timer);
+        timerEl.textContent = "Time's up!";
+        document.getElementById("timesup-sound").play();
+
+        document.querySelectorAll(".word-btn").forEach(btn => {
+          btn.disabled = true;
+        });
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
